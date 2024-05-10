@@ -27,3 +27,4 @@ with open('twitter_training.csv', 'r') as file:
 producer.flush()
 
 # Adding new comment
+# Adding second comment
