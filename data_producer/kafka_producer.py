@@ -26,3 +26,4 @@ with open('twitter_training.csv', 'r') as file:
 # Flush the producer to ensure all messages are sent
 producer.flush()
 
+# Adding new comment
