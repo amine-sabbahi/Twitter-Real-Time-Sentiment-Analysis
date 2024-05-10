@@ -1,0 +1,64 @@
+version: '3'
+
+services:
+  zookeeper:
+    image: zookeeper:3.7.2
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - twitter_kafka
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    hostname: kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+    depends_on:
+      - zookeeper
+    networks:
+      - twitter_kafka
+    healthcheck:
+      test: "nc -z localhost 9092"  # Check if the Kafka port is open
+      interval: 10s  # Check every 10 seconds
+      timeout: 10s   # Timeout after 10 seconds
+      retries: 5     # Retry 5 times before considering the service unhealthy
+
+  create_kafka_topic:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - twitter_kafka
+    command: >
+      bash -c "echo 'Creation TOPICS : ' && /usr/bin/kafka-topics --create --topic twitter_data --partitions 2 --replication-factor 1 --if-not-exists --bootstrap-server kafka:9092"
+
+  producer:
+    build:
+      context: ./data_producer
+    depends_on:
+      - create_kafka_topic
+    networks:
+      - twitter_kafka
+    volumes:
+      - ./data:/app/data
+
+  consumer:
+    build:
+      context: ./data_consumer
+    depends_on:
+      - create_kafka_topic
+    networks:
+      - twitter_kafka
+
+networks:
+  twitter_kafka:
+    driver: bridge
