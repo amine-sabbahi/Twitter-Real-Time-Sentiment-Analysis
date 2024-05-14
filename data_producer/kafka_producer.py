@@ -49,7 +49,7 @@ with open('twitter_validation.csv', 'r') as file:
         }
         producer.send(topic_name, value=message)
         # Uncomment the following line to log every message sent (can generate lots of logs)
-        # logger.info(f"Produced message: {message}")
+        logger.info(f"Produced message: {message}")
         sleep(1)
 
 # Ensure all messages are sent
