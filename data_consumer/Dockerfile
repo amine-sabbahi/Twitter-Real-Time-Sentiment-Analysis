@@ -4,7 +4,9 @@ WORKDIR /app
 
 COPY kafka_consumer.py /app
 COPY requirements.txt /app
+COPY lr_model /app
 
 RUN pip install --no-cache-dir -r requirements.txt
+
 
 CMD ["python", "kafka_consumer.py"]

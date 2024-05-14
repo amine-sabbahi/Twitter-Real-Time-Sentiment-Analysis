@@ -41,6 +41,25 @@ services:
     command: >
       bash -c "echo 'Creation TOPICS : ' && /usr/bin/kafka-topics --create --topic twitter_data --partitions 2 --replication-factor 1 --if-not-exists --bootstrap-server kafka:9092"
 
+  spark:
+    image: docker.io/bitnami/spark:3.4
+    environment:
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+    ports:
+      - '8080:8080'
+    depends_on:
+      - create_kafka_topic
+    networks:
+      - twitter_kafka
+    volumes:
+      - ./data_consumer:/app/data_consumer
+    command: bash -c "/app/data_consumer/start_master.sh"
+
+
   producer:
     build:
       context: ./data_producer
@@ -50,14 +69,6 @@ services:
       - twitter_kafka
     volumes:
       - ./data:/app/data
-
-  consumer:
-    build:
-      context: ./data_consumer
-    depends_on:
-      - create_kafka_topic
-    networks:
-      - twitter_kafka
 
 networks:
   twitter_kafka:

@@ -1,2 +1,4 @@
 kafka-python
+pyspark
 pymongo
+pandas
