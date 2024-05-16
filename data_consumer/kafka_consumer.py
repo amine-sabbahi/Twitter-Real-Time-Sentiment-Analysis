@@ -78,10 +78,15 @@ for message in consumer:
         # Map numeric prediction to sentiment text
         predictions = predictions.withColumn('Predicted Sentiment', sentiment_mapping_udf(predictions['prediction']))
 
-        # Select necessary columns for storage
+        # Select necessary columns for storage with adjusted column names
         predicted_data = predictions.select(
-            'Tweet ID', 'Entity', 'Tweet content', 'Predicted Sentiment', 'Accuracy'
+            col('Tweet ID').alias('Tweet_ID'),
+            col('Entity'),
+            col('Tweet content').alias('Tweet_Content'),
+            col('Predicted Sentiment').alias('Predicted_Sentiment'),
+            col('Accuracy')
         )
+
 
         # Convert DataFrame to list of dictionaries to insert into MongoDB
         predicted_data_dict = [row.asDict() for row in predicted_data.collect()]
