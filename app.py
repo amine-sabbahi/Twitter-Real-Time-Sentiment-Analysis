@@ -1,23 +1,25 @@
-from flask import Flask, jsonify, render_template
+from flask import Flask, render_template, jsonify
+from bson import json_util
+import json
 from pymongo import MongoClient
-from bson.json_util import dumps
-import os
 
 app = Flask(__name__)
-
-mongo_host = os.getenv('MONGO_HOST', 'localhost')
-mongo_client = MongoClient(f'mongodb://{mongo_host}:27017')
-db = mongo_client['twitter_db']
-collection = db['twitter_collection']
-
-@app.route('/data')
-def get_data():
-    cursor = collection.find().sort('_id', -1).limit(20)  # Fetch the latest 100 entries
-    return dumps(cursor)
+client = MongoClient('mongodb://localhost:27017/')
+db = client.twitter_db
+collection = db.twitter_collection
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/data')
+def get_data():
+    data = list(collection.find())
+    # Convert ObjectId to string
+    for item in data:
+        item['_id'] = str(item['_id'])
+    # Serialize data to JSON
+    return json.dumps(data, default=json_util.default)
 
 if __name__ == '__main__':
     app.run(debug=True)

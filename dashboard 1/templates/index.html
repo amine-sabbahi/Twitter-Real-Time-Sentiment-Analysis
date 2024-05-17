@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Twitter Sentiment Dashboard</title>
+    <style>
+        .chart-container {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+        .chart {
+            width: 45%;
+            max-width: 600px;
+            margin: 10px;
+        }
+        .table-container {
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Twitter Sentiment Analysis</h1>
+    <div class="chart-container">
+        <canvas id="line-chart" class="chart"></canvas>
+        <canvas id="bar-chart" class="chart"></canvas>
+    </div>
+    <div class="chart-container">
+        <canvas id="pie-chart" class="chart"></canvas>
+        <canvas id="word-count-chart" class="chart"></canvas>
+    </div>
+    <div class="table-container">
+        <table id="data-table">
+            <thead>
+                <tr>
+                    <th>Tweet ID</th>
+                    <th>Entity</th>
+                    <th>Tweet Content</th>
+                    <th>Predicted Sentiment</th>
+                    <th>Accuracy</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        const lineCtx = document.getElementById('line-chart').getContext('2d');
+        const barCtx = document.getElementById('bar-chart').getContext('2d');
+        const pieCtx = document.getElementById('pie-chart').getContext('2d');
+        const wordCountCtx = document.getElementById('word-count-chart').getContext('2d');
+
+        const lineChart = new Chart(lineCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Accuracy',
+                    data: [],
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { title: { display: true, text: 'Tweet ID' }},
+                    y: { title: { display: true, text: 'Accuracy (%)' }, min: 0, max: 100 }
+                }
+            }
+        });
+
+        const barChart = new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Accuracy',
+                    data: [],
+                    backgroundColor: []
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { title: { display: true, text: 'Tweet ID' }},
+                    y: { title: { display: true, text: 'Accuracy (%)' }, min: 0, max: 100 }
+                }
+            }
+        });
+
+        const pieChart = new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Positive', 'Negative', 'Neutral', 'Irrelevant'],
+                datasets: [{
+                    label: 'Sentiment Distribution',
+                    data: [0, 0, 0, 0],
+                    backgroundColor: ['green', 'red', 'gray', 'blue']
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+
+        const wordCountChart = new Chart(wordCountCtx, {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Word Count Map',
+                    data: [],
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { title: { display: true, text: 'Word' }},
+                    y: { title: { display: true, text: 'Count' }}
+                }
+            }
+        });
+
+        function countWords(str) {
+            return str.trim().split(/\s+/).length;
+        }
+
+        function countWordMap(data) {
+            const wordMap = {};
+            data.forEach(d => {
+                const words = d.Entity.split(/\s+/);
+                words.forEach(word => {
+                    if (!wordMap[word]) {
+                        wordMap[word] = 1;
+                    } else {
+                        wordMap[word]++;
+                    }
+                });
+            });
+            return wordMap;
+        }
+
+        function fetchData() {
+            fetch('/data')
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('data-table').getElementsByTagName('tbody')[0];
+                    tableBody.innerHTML = "";  // Clear existing rows
+
+                    const tweetIDs = [];
+                    const accuracies = [];
+                    const colors = [];
+                    const sentimentCounts = { Positive: 0, Negative: 0, Neutral: 0, Irrelevant: 0 };
+                    const entityWordCounts = countWordMap(data);
+
+                    data.forEach(d => {
+                        tweetIDs.push(d.Tweet_ID);
+                        accuracies.push(d.Accuracy);
+                        colors.push(d.Predicted_Sentiment === 'Positive' ? 'green' :
+                                    d.Predicted_Sentiment === 'Negative' ? 'red' :
+                                    d.Predicted_Sentiment === 'Neutral' ? 'gray' : 'blue');
+
+                        sentimentCounts[d.Predicted_Sentiment]++;
+
+                        const row = tableBody.insertRow();
+                        row.insertCell(0).textContent = d.Tweet_ID;
+                        row.insertCell(1).textContent = d.Entity;
+                        row.insertCell(2).textContent = d.Tweet_Content;
+                        row.insertCell(3).textContent = d.Predicted_Sentiment;
+                        row.insertCell(4).textContent = d.Accuracy;
+                    });
+
+                    // Update word count chart
+                    wordCountChart.data.labels = Object.keys(entityWordCounts);
+                    wordCountChart.data.datasets[0].data = Object.values(entityWordCounts);
+                    wordCountChart.update();
+
+                    lineChart.data.labels = tweetIDs;
+                    lineChart.data.datasets[0].data = accuracies;
+                    lineChart.update();
+
+                    barChart.data.labels = tweetIDs;
+                    barChart.data.datasets[0].data = accuracies;
+                    barChart.data.datasets[0].backgroundColor = colors;
+                    barChart.update();
+
+                    pieChart.data.datasets[0].data = [
+                        sentimentCounts.Positive,
+                        sentimentCounts.Negative,
+                        sentimentCounts.Neutral,
+                        sentimentCounts.Irrelevant
+                    ];
+                    pieChart.update();
+                });
+        }
+
+        setInterval(fetchData, 1000);
+    </script>
+</body>
+</html>

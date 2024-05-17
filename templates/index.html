@@ -2,66 +2,261 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Twitter Sentiment Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitter Dashboard</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <!-- Include Chart.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
     <style>
-        .chart-container {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
-            overflow-x: auto;
+        #tweetTable {
+          width: 100%;
+          table-layout: fixed;
+          border-collapse: collapse;
         }
-        .chart {
-            width: 45%;
-            max-width: 600px;
-            margin: 10px;
+        #tweetTable tbody {
+          display: block;
+          width: 100%;
+          overflow: auto;
+          height: 400px;
         }
-        .table-container {
-            margin: 20px;
+        #tweetTable thead tr {
+          display: block;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid black;
-            padding: 8px;
+        #tweetTable th,
+        #tweetTable td {
+            padding: 5px;
             text-align: left;
+            width: 100%;
+        }
+        .navbar {
+            background-color: #f8f9fa;
+        }
+        .navbar-nav {
+            flex-direction: row;
+        }
+        .nav-item {
+            margin-left: 20px;
+        }
+        .nav-link {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #007bff;
+        }
+        .nav-link:hover {
+            color: #0056b3;
+        }
+        .nav-link.active {
+            color: #0056b3;
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <h1>Twitter Sentiment Analysis</h1>
-    <div class="chart-container">
-        <canvas id="line-chart" class="chart"></canvas>
-        <canvas id="bar-chart" class="chart"></canvas>
-    </div>
-    <div class="chart-container">
-        <canvas id="pie-chart" class="chart"></canvas>
-        <canvas id="word-count-chart" class="chart"></canvas>
-    </div>
-    <div class="table-container">
-        <table id="data-table">
-            <thead>
-                <tr>
-                    <th>Tweet ID</th>
-                    <th>Entity</th>
-                    <th>Tweet Content</th>
-                    <th>Predicted Sentiment</th>
-                    <th>Accuracy</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
+    <!-- Navigation bar -->
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="#">Dashboard <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Project Architecture</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Team</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-lg-6 col-md-12">
+                <canvas id="sentimentChart" width="400" height="300"></canvas>
+            </div>
+            <div class="col-lg-6 col-md-12">
+                <canvas id="lineChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+        <div class="row mt-5">
+            <div class="col-lg-6 col-md-12">
+                <canvas id="pieChart" width="400" height="300"></canvas>
+            </div>
+            <div class="col-lg-6 col-md-12">
+                <canvas id="scatterChart" width="400" height="300"></canvas>
+            </div>
+        </div>
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="table-container">
+                    <div class="table-body-container">
+                        <table id="tweetTable" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th style="max-width: 100px; overflow: hidden; text-overflow: ellipsis;">Tweet ID</th>
+                                    <th style="max-width: 125px; overflow: hidden; text-overflow: ellipsis;">Entity</th>
+                                    <th style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">Tweet content</th>
+                                    <th style="max-width: 100px; overflow: hidden; text-overflow: ellipsis;">Predicted Sentiment</th>
+                                    <th style="max-width: 125px; overflow: hidden; text-overflow: ellipsis;">Accuracy</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        const lineCtx = document.getElementById('line-chart').getContext('2d');
-        const barCtx = document.getElementById('bar-chart').getContext('2d');
-        const pieCtx = document.getElementById('pie-chart').getContext('2d');
-        const wordCountCtx = document.getElementById('word-count-chart').getContext('2d');
+        // Fetch data from Flask endpoint
+        function fetchData() {
+            fetch('/data')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    let tableBody = document.querySelector('#tweetTable tbody');
+                    tableBody.innerHTML = '';
 
-        const lineChart = new Chart(lineCtx, {
+                    data.forEach(tweet => {
+                        let row = `<tr>
+                            <td style="max-width: 100px; overflow: hidden; text-overflow: ellipsis;">${tweet['Tweet_ID']}</td>
+                            <td style="max-width: 125px; overflow: hidden; text-overflow: ellipsis;">${tweet['Entity']}</td>
+                            <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">${tweet['Tweet_Content']}</td>
+                            <td style="max-width: 100px; overflow: hidden; text-overflow: ellipsis;">${tweet['Predicted_Sentiment']}</td>
+                            <td style="max-width: 125px; overflow: hidden; text-overflow: ellipsis;">${tweet['Accuracy']}</td>
+                        </tr>`;
+                        tableBody.insertAdjacentHTML('afterbegin', row);
+                    });
+
+                    // Update the charts with the new data
+                    updateCharts(data);
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    // Handle error gracefully, e.g., display a message to the user
+                });
+        }
+
+        // Function to update all charts
+        function updateCharts(data) {
+            // Update sentiment chart
+            let sentimentsCount = {
+                'Positive': 0,
+                'Negative': 0,
+                'Neutral': 0,
+                'Irrelevant': 0
+            };
+
+            data.forEach(tweet => {
+                sentimentsCount[tweet['Predicted_Sentiment']]++;
+            });
+
+            sentimentChart.data.labels = Object.keys(sentimentsCount);
+            sentimentChart.data.datasets[0].data = Object.values(sentimentsCount);
+            sentimentChart.update();
+
+            // Update line chart
+            let labels = data.map(tweet => tweet['Tweet_ID']);
+            let accuracies = data.map(tweet => parseFloat(tweet['Accuracy']));
+
+            lineChart.data.labels = labels;
+            lineChart.data.datasets[0].data = accuracies;
+            lineChart.update();
+
+            // Update pie chart
+            pieChart.data.labels = Object.keys(sentimentsCount);
+            pieChart.data.datasets[0].data = Object.values(sentimentsCount);
+            pieChart.update();
+
+            // Update scatter plot chart
+            let scatterData = {
+                'Positive': [],
+                'Negative': [],
+                'Neutral': [],
+                'Irrelevant': []
+            };
+
+            data.forEach(tweet => {
+                scatterData[tweet['Predicted_Sentiment']].push({
+                    x: parseFloat(tweet['Accuracy']),
+                    y: sentimentsCount[tweet['Predicted_Sentiment']]
+                });
+            });
+
+            scatterChart.data.datasets = [
+                {
+                    label: 'Positive',
+                    data: scatterData['Positive'],
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)'
+                },
+                {
+                    label: 'Negative',
+                    data: scatterData['Negative'],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)'
+                },
+                {
+                    label: 'Neutral',
+                    data: scatterData['Neutral'],
+                    backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                    borderColor: 'rgba(255, 206, 86, 1)'
+                },
+                {
+                    label: 'Irrelevant',
+                    data: scatterData['Irrelevant'],
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)'
+                }
+            ];
+            scatterChart.update();
+        }
+
+        // Initialize sentiment chart
+        var ctx1 = document.getElementById('sentimentChart').getContext('2d');
+        var sentimentChart = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: ['Positive', 'Negative', 'Neutral', 'Irrelevant'],
+                datasets: [{
+                    label: 'Sentiment',
+                    data: [0, 0, 0, 0],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+
+        // Initialize line chart
+        var ctx2 = document.getElementById('lineChart').getContext('2d');
+        var lineChart = new Chart(ctx2, {
             type: 'line',
             data: {
                 labels: [],
@@ -69,147 +264,91 @@
                     label: 'Accuracy',
                     data: [],
                     borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
                     fill: false
                 }]
             },
             options: {
-                responsive: true,
                 scales: {
-                    x: { title: { display: true, text: 'Tweet ID' }},
-                    y: { title: { display: true, text: 'Accuracy (%)' }, min: 0, max: 100 }
+                    xAxes: [{
+                        type: 'category',
+                        ticks: {
+                            autoSkip: true,
+                            maxTicksLimit: 20
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
                 }
             }
         });
 
-        const barChart = new Chart(barCtx, {
-            type: 'bar',
-            data: {
-                labels: [],
-                datasets: [{
-                    label: 'Accuracy',
-                    data: [],
-                    backgroundColor: []
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    x: { title: { display: true, text: 'Tweet ID' }},
-                    y: { title: { display: true, text: 'Accuracy (%)' }, min: 0, max: 100 }
-                }
-            }
-        });
-
-        const pieChart = new Chart(pieCtx, {
+        // Initialize pie chart
+        var ctx3 = document.getElementById('pieChart').getContext('2d');
+        var pieChart = new Chart(ctx3, {
             type: 'pie',
             data: {
-                labels: ['Positive', 'Negative', 'Neutral', 'Irrelevant'],
+                labels: [],
                 datasets: [{
-                    label: 'Sentiment Distribution',
-                    data: [0, 0, 0, 0],
-                    backgroundColor: ['green', 'red', 'gray', 'blue']
+                    label: 'Sentiment',
+                    data: [],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)'
+                    ],
+                    borderWidth: 1
                 }]
-            },
-            options: {
-                responsive: true
             }
         });
 
-        const wordCountChart = new Chart(wordCountCtx, {
-            type: 'bar',
+        // Initialize scatter plot chart
+        var ctx4 = document.getElementById('scatterChart').getContext('2d');
+        var scatterChart = new Chart(ctx4, {
+            type: 'scatter',
             data: {
-                labels: [],
-                datasets: [{
-                    label: 'Word Count Map',
-                    data: [],
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                    borderWidth: 1
-                }]
+                datasets: []
             },
             options: {
-                responsive: true,
                 scales: {
-                    x: { title: { display: true, text: 'Word' }},
-                    y: { title: { display: true, text: 'Count' }}
+                    xAxes: [{
+                        type: 'linear',
+                        position: 'bottom',
+                        ticks: {
+                            beginAtZero: true
+                        },
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Accuracy'
+                        }
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        },
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Sentiment Count'
+                        }
+                    }]
                 }
             }
         });
 
-        function countWords(str) {
-            return str.trim().split(/\s+/).length;
-        }
-
-        function countWordMap(data) {
-            const wordMap = {};
-            data.forEach(d => {
-                const words = d.Entity.split(/\s+/);
-                words.forEach(word => {
-                    if (!wordMap[word]) {
-                        wordMap[word] = 1;
-                    } else {
-                        wordMap[word]++;
-                    }
-                });
-            });
-            return wordMap;
-        }
-
-        function fetchData() {
-            fetch('/data')
-                .then(response => response.json())
-                .then(data => {
-                    const tableBody = document.getElementById('data-table').getElementsByTagName('tbody')[0];
-                    tableBody.innerHTML = "";  // Clear existing rows
-
-                    const tweetIDs = [];
-                    const accuracies = [];
-                    const colors = [];
-                    const sentimentCounts = { Positive: 0, Negative: 0, Neutral: 0, Irrelevant: 0 };
-                    const entityWordCounts = countWordMap(data);
-
-                    data.forEach(d => {
-                        tweetIDs.push(d.Tweet_ID);
-                        accuracies.push(d.Accuracy);
-                        colors.push(d.Predicted_Sentiment === 'Positive' ? 'green' :
-                                    d.Predicted_Sentiment === 'Negative' ? 'red' :
-                                    d.Predicted_Sentiment === 'Neutral' ? 'gray' : 'blue');
-
-                        sentimentCounts[d.Predicted_Sentiment]++;
-
-                        const row = tableBody.insertRow();
-                        row.insertCell(0).textContent = d.Tweet_ID;
-                        row.insertCell(1).textContent = d.Entity;
-                        row.insertCell(2).textContent = d.Tweet_Content;
-                        row.insertCell(3).textContent = d.Predicted_Sentiment;
-                        row.insertCell(4).textContent = d.Accuracy;
-                    });
-
-                    // Update word count chart
-                    wordCountChart.data.labels = Object.keys(entityWordCounts);
-                    wordCountChart.data.datasets[0].data = Object.values(entityWordCounts);
-                    wordCountChart.update();
-
-                    lineChart.data.labels = tweetIDs;
-                    lineChart.data.datasets[0].data = accuracies;
-                    lineChart.update();
-
-                    barChart.data.labels = tweetIDs;
-                    barChart.data.datasets[0].data = accuracies;
-                    barChart.data.datasets[0].backgroundColor = colors;
-                    barChart.update();
-
-                    pieChart.data.datasets[0].data = [
-                        sentimentCounts.Positive,
-                        sentimentCounts.Negative,
-                        sentimentCounts.Neutral,
-                        sentimentCounts.Irrelevant
-                    ];
-                    pieChart.update();
-                });
-        }
-
-        setInterval(fetchData, 1000);
+        // Fetch initial data
+        fetchData();
+        // Update data every 5 seconds
+        setInterval(fetchData, 5000);
     </script>
 </body>
 </html>
