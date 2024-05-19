@@ -5,6 +5,7 @@ Ce projet a été réalisé dans le cadre du Mini Projet Big Data à l'Universit
 ## Table des Matières
 - [Aperçu](#aperçu)
 - [Architecture](#architecture)
+- [Structure du Projet](#structure-du-projet)
 - [Technologies Utilisées](#technologies-utilisées)
 - [Installation](#installation)
 - [Utilisation](#utilisation)
@@ -40,6 +41,38 @@ L'architecture du projet est illustrée ci-dessous :
 5. **Application Web** :
    - Déploiement avec Flask.
    - Visualisation des résultats en temps réel avec Chart.js.
+
+## Structure du Projet
+
+```bash
+twitter-sentiment-analysis/
+│
+├── data_consumer/               # Contient les scripts pour consommer les données de Kafka
+│   ├── lr_model/                # Contient le modèle de Régression Logistique entraîné
+│   │   └── model.pkl            # Fichier du modèle entraîné
+│   ├── kafka_consumer.py        # Script pour consommer les messages de Kafka
+│   └── requirements.txt         # Dépendances nécessaires pour le consommateur de données
+│
+├── data_producer/               # Contient les scripts pour produire des données dans Kafka
+│   ├── Dataset/                 # Contient les jeux de données d'entraînement et de validation
+│   │   ├── twitter_training.csv # Jeu de données d'entraînement
+│   │   └── twitter_validation.csv # Jeu de données de validation
+│   ├── Dockerfile               # Dockerfile pour créer l'image du producteur de données
+│   ├── kafka_producer.py        # Script pour produire des messages dans Kafka
+│   └── requirements.txt         # Dépendances nécessaires pour le producteur de données
+│
+├── images/                      # Contient les images utilisées dans le projet
+│   ├── architecture.png         # Diagramme de l'architecture du projet
+│   └── technologies.png         # Diagramme des technologies utilisées
+│
+├── templates/                   # Contient les templates HTML pour l'application web
+│   └── index.html               # Page principale de l'application web
+│
+├── Pysparktrait.ipynb           # Notebook Jupyter pour le prétraitement des données avec PySpark
+├── README.md                    # Fichier README décrivant le projet
+├── app.py                       # Script principal de l'application Flask
+├── docker-compose.yml           # Fichier de configuration Docker Compose
+```
 
 ## Technologies Utilisées
 
@@ -88,6 +121,8 @@ Pour installer et exécuter ce projet localement, suivez les étapes ci-dessous 
 
 1. Accédez à l'application Web à l'adresse suivante : http://localhost:5000.
 2. Visualisez les sentiments des tweets en temps réel sur le tableau de bord.
+
+![dashboard](images/dashboard.png)
 
 ## Contributeurs
 
