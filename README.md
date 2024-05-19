@@ -24,14 +24,14 @@ L'architecture du projet est illustrée ci-dessous :
 ![Architecture](images/architecture.png)
 
 1. **Producteur de Streaming Kafka** :
-   - Récupération des tweets via l'API Twitter.
+   - Récupération des tweets via le fichier csv "twitter_validation.csv".
    - Envoi des tweets à Kafka pour le streaming.
 
 2. **Courtier de Streaming Kafka** :
    - Distribution des tweets aux consommateurs.
 
 3. **Consommateur de Streaming** :
-   - Analyse des tweets en utilisant un modèle de Régression Logistique.
+   - Predicte des tweets en utilisant un modèle de Régression Logistique.
    - Envoi des résultats à MongoDB.
 
 4. **Base de Données** :
@@ -85,6 +85,6 @@ Pour installer et exécuter ce projet localement, suivez les étapes ci-dessous 
 ## Contributeurs
 
    -SABBAHI MOHAMED AMINE - [Votre Profil GitHub](https://github.com/amine-sabbahi).
-   
+
    -MAHRI AYMANE - [Votre Profil GitHub](https://github.com/AymaneM21).
    
