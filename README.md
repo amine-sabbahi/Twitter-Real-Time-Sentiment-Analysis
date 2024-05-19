@@ -91,7 +91,7 @@ Pour installer et exécuter ce projet localement, suivez les étapes ci-dessous 
 
 ## Contributeurs
 
-   -SABBAHI MOHAMED AMINE - [Votre Profil GitHub](https://github.com/amine-sabbahi).
+   - SABBAHI MOHAMED AMINE - [Votre Profil GitHub](https://github.com/amine-sabbahi).
 
-   -MAHRI AYMANE - [Votre Profil GitHub](https://github.com/AymaneM21).
+   - MAHRI AYMANE - [Votre Profil GitHub](https://github.com/AymaneM21).
    
