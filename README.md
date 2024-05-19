@@ -21,7 +21,7 @@ Ce projet permet de :
 
 L'architecture du projet est illustrée ci-dessous :
 
-![Architecture](path/to/your/image.png)
+![Architecture](images/architecture.png)
 
 1. **Producteur de Streaming Kafka** :
    - Récupération des tweets via l'API Twitter.
@@ -84,6 +84,6 @@ Pour installer et exécuter ce projet localement, suivez les étapes ci-dessous 
 
 ## Contributeurs
 
-   -SABBAHI MOHAMED AMINE - [Votre Profil GitHub](https://github.com/amine-sabbahi)
-   -MAHRI AYMANE - [Votre Profil GitHub](https://github.com/AymaneM21)
+   -SABBAHI MOHAMED AMINE - [Votre Profil GitHub](https://github.com/amine-sabbahi).
+   -MAHRI AYMANE - [Votre Profil GitHub](https://github.com/AymaneM21).
    
