@@ -43,6 +43,8 @@ L'architecture du projet est illustrée ci-dessous :
 
 ## Technologies Utilisées
 
+![technologies](images/technologies.png)
+
 | Catégorie                | Outils/Technologies    | Description                                                                                         |
 |--------------------------|------------------------|-----------------------------------------------------------------------------------------------------|
 | **Technologies et Outils** | Kafka                   | Utilisé pour le streaming des données en temps réel.                                                 |
@@ -60,8 +62,6 @@ L'architecture du projet est illustrée ci-dessous :
 |                          | flask                   | Utilisé pour développer le backend de l'application web.                                             |
 | **Dépôt de Code**        | GitHub                  | Héberge le code source du projet, facilitant la collaboration et le suivi des modifications du code. |
 
-![technologies](images/technologies.png)
-
 ## Installation
 
 Pour installer et exécuter ce projet localement, suivez les étapes ci-dessous :
@@ -75,7 +75,12 @@ Pour installer et exécuter ce projet localement, suivez les étapes ci-dessous 
    ```bash
    docker-compose up --build
    ```
-3. Démarrez l'application Flask :
+3.  Start and connect to the MongoDB Service :
+   ```bash
+   sudo systemctl start mongodb
+   mongo
+   ```
+4. Démarrez l'application Flask :
    ```
    python app.py
    ```
