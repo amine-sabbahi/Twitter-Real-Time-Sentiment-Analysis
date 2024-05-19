@@ -75,7 +75,7 @@ Pour installer et exécuter ce projet localement, suivez les étapes ci-dessous 
    ```bash
    docker-compose up --build
    ```
-3.  Start and connect to the MongoDB Service :
+3. Start and connect to the MongoDB Service :
    ```bash
    sudo systemctl start mongodb
    mongo
