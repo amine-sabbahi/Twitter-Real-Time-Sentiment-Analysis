@@ -10,7 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
     <style>
         #tweetTable {
-          width: 100%;
+          width: 1100px;
           table-layout: fixed;
           border-collapse: collapse;
         }
@@ -20,14 +20,17 @@
           overflow: auto;
           height: 400px;
         }
+        
         #tweetTable thead tr {
           display: block;
+        
+
         }
         #tweetTable th,
         #tweetTable td {
             padding: 5px;
             text-align: left;
-            width: 100%;
+            width: 1100px;
         }
         .navbar {
             background-color: #f8f9fa;
@@ -85,7 +88,7 @@
                 <canvas id="pieChart" width="400" height="300"></canvas>
             </div>
             <div class="col-lg-6 col-md-12">
-                <canvas id="scatterChart" width="400" height="300"></canvas>
+                <canvas id="radarChart" width="400" height="300"></canvas>
             </div>
         </div>
         <div class="row mt-5">
@@ -95,11 +98,11 @@
                         <table id="tweetTable" class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th style="max-width: 100px; overflow: hidden; text-overflow: ellipsis;">Tweet ID</th>
-                                    <th style="max-width: 125px; overflow: hidden; text-overflow: ellipsis;">Entity</th>
-                                    <th style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">Tweet content</th>
-                                    <th style="max-width: 100px; overflow: hidden; text-overflow: ellipsis;">Predicted Sentiment</th>
-                                    <th style="max-width: 125px; overflow: hidden; text-overflow: ellipsis;">Accuracy</th>
+                                    <th style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">Tweet ID</th>
+                                    <th style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">Entity</th>
+                                    <th style="max-width: 500px; overflow: hidden; text-overflow: ellipsis;">Tweet content</th>
+                                    <th style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">Predicted Sentiment</th>
+                                    <th style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">Accuracy</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -126,11 +129,11 @@
 
                     data.forEach(tweet => {
                         let row = `<tr>
-                            <td style="max-width: 100px; overflow: hidden; text-overflow: ellipsis;">${tweet['Tweet_ID']}</td>
-                            <td style="max-width: 125px; overflow: hidden; text-overflow: ellipsis;">${tweet['Entity']}</td>
-                            <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">${tweet['Tweet_Content']}</td>
-                            <td style="max-width: 100px; overflow: hidden; text-overflow: ellipsis;">${tweet['Predicted_Sentiment']}</td>
-                            <td style="max-width: 125px; overflow: hidden; text-overflow: ellipsis;">${tweet['Accuracy']}</td>
+                            <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">${tweet['Tweet_ID']}</td>
+                            <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">${tweet['Entity']}</td>
+                            <td style="max-width: 500px; overflow: hidden; text-overflow: ellipsis;">${tweet['Tweet_Content']}</td>
+                            <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">${tweet['Predicted_Sentiment']}</td>
+                            <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">${tweet['Accuracy']}</td>
                         </tr>`;
                         tableBody.insertAdjacentHTML('afterbegin', row);
                     });
@@ -175,48 +178,15 @@
             pieChart.data.datasets[0].data = Object.values(sentimentsCount);
             pieChart.update();
 
-            // Update scatter plot chart
-            let scatterData = {
-                'Positive': [],
-                'Negative': [],
-                'Neutral': [],
-                'Irrelevant': []
-            };
-
-            data.forEach(tweet => {
-                scatterData[tweet['Predicted_Sentiment']].push({
-                    x: parseFloat(tweet['Accuracy']),
-                    y: sentimentsCount[tweet['Predicted_Sentiment']]
-                });
-            });
-
-            scatterChart.data.datasets = [
-                {
-                    label: 'Positive',
-                    data: scatterData['Positive'],
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    borderColor: 'rgba(255, 99, 132, 1)'
-                },
-                {
-                    label: 'Negative',
-                    data: scatterData['Negative'],
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    borderColor: 'rgba(54, 162, 235, 1)'
-                },
-                {
-                    label: 'Neutral',
-                    data: scatterData['Neutral'],
-                    backgroundColor: 'rgba(255, 206, 86, 0.2)',
-                    borderColor: 'rgba(255, 206, 86, 1)'
-                },
-                {
-                    label: 'Irrelevant',
-                    data: scatterData['Irrelevant'],
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderColor: 'rgba(75, 192, 192, 1)'
-                }
+            // Update radar chart
+            radarChart.data.labels = ['Positive', 'Negative', 'Neutral', 'Irrelevant'];
+            radarChart.data.datasets[0].data = [
+                sentimentsCount['Positive'],
+                sentimentsCount['Negative'],
+                sentimentsCount['Neutral'],
+                sentimentsCount['Irrelevant']
             ];
-            scatterChart.update();
+            radarChart.update();
         }
 
         // Initialize sentiment chart
@@ -312,43 +282,37 @@
             }
         });
 
-        // Initialize scatter plot chart
-        var ctx4 = document.getElementById('scatterChart').getContext('2d');
-        var scatterChart = new Chart(ctx4, {
-            type: 'scatter',
+        
+        // Initialize radar chart
+        var ctx4 = document.getElementById('radarChart').getContext('2d');
+        var radarChart = new Chart(ctx4, {
+            type: 'radar',
             data: {
-                datasets: []
+                labels: ['Positive', 'Negative', 'Neutral', 'Irrelevant'],
+                datasets: [{
+                    label: 'Sentiment Distribution',
+                    data: [0, 0, 0, 0],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(54, 162, 235, 1)'
+                }]
             },
             options: {
-                scales: {
-                    xAxes: [{
-                        type: 'linear',
-                        position: 'bottom',
-                        ticks: {
-                            beginAtZero: true
-                        },
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Accuracy'
-                        }
-                    }],
-                    yAxes: [{
-                        ticks: {
-                            beginAtZero: true
-                        },
-                        scaleLabel: {
-                            display: true,
-                            labelString: 'Sentiment Count'
-                        }
-                    }]
+                scale: {
+                    ticks: {
+                        beginAtZero: true
+                    }
                 }
             }
         });
 
         // Fetch initial data
         fetchData();
-        // Update data every 5 seconds
-        setInterval(fetchData, 5000);
+        // Update data every 3 seconds
+        setInterval(fetchData, 3000);
     </script>
 </body>
 </html>
