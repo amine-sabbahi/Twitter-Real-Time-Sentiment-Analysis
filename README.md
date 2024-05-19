@@ -60,6 +60,8 @@ L'architecture du projet est illustrée ci-dessous :
 |                          | flask                   | Utilisé pour développer le backend de l'application web.                                             |
 | **Dépôt de Code**        | GitHub                  | Héberge le code source du projet, facilitant la collaboration et le suivi des modifications du code. |
 
+![technologies](images/technologies.png)
+
 ## Installation
 
 Pour installer et exécuter ce projet localement, suivez les étapes ci-dessous :
