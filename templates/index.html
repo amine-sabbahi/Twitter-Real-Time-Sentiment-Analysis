@@ -52,7 +52,28 @@
         .nav-link.active {
             color: #0056b3;
         }
+        .sentiment-box-negative {
+            background-color: rgba(54, 162, 235, 0.2);
+            border-color: rgba(54, 162, 235, 1);
+            color: rgba(54, 162, 235, 1);
+        }
+        .sentiment-box-irrelevant {
+            background-color: rgba(75, 192, 192, 0.2);
+            border-color: rgba(75, 192, 192, 1);
+            color: rgba(75, 192, 192, 1);
+        }
+        .sentiment-box-neutral {
+            background-color: rgba(255, 206, 86, 0.2);
+            border-color: rgba(255, 206, 86, 1);
+            color: rgba(255, 206, 86, 1);
+        }
+        .sentiment-box-positive {
+            background-color: rgba(255, 99, 132, 0.2);
+            border-color: rgba(255, 99, 132, 1);
+            color: rgba(255, 99, 132, 1);
+        }
     </style>
+
 </head>
 <body>
     <!-- Navigation bar -->
@@ -75,14 +96,51 @@
     </nav>
 
     <div class="container mt-5">
-        <div class="row">
-            <div class="col-lg-6 col-md-12">
-                <canvas id="sentimentChart" width="400" height="300"></canvas>
-            </div>
-            <div class="col-lg-6 col-md-12">
-                <canvas id="lineChart" width="400" height="300"></canvas>
+         <!-- Sentiment Count Boxes -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card text-black sentiment-box-negative mb-3">
+                <div class="card-header">Negative</div>
+                <div class="card-body">
+                    <h5 class="card-title" id="negativeCount">0</h5>
+                </div>
             </div>
         </div>
+        <div class="col-md-3">
+            <div class="card text-black sentiment-box-positive mb-3">
+                <div class="card-header">Positive</div>
+                <div class="card-body">
+                    <h5 class="card-title" id="positiveCount">0</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-black sentiment-box-neutral mb-3">
+                <div class="card-header">Neutral</div>
+                <div class="card-body">
+                    <h5 class="card-title" id="neutralCount">0</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-black sentiment-box-irrelevant mb-3">
+                <div class="card-header">Irrelevant</div>
+                <div class="card-body">
+                    <h5 class="card-title" id="irrelevantCount">0</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Existing dashboard content starts here -->
+    <div class="row">
+        <div class="col-lg-6 col-md-12">
+            <canvas id="sentimentChart" width="400" height="300"></canvas>
+        </div>
+        <div class="col-lg-6 col-md-12">
+            <canvas id="lineChart" width="400" height="300"></canvas>
+        </div>
+    </div>
+        
         <div class="row mt-5">
             <div class="col-lg-6 col-md-12">
                 <canvas id="pieChart" width="400" height="300"></canvas>
@@ -116,36 +174,62 @@
     <script>
         // Fetch data from Flask endpoint
         function fetchData() {
-            fetch('/data')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    let tableBody = document.querySelector('#tweetTable tbody');
-                    tableBody.innerHTML = '';
+    fetch('/data')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            let tableBody = document.querySelector('#tweetTable tbody');
+            tableBody.innerHTML = '';
 
-                    data.forEach(tweet => {
-                        let row = `<tr>
-                            <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">${tweet['Tweet_ID']}</td>
-                            <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">${tweet['Entity']}</td>
-                            <td style="max-width: 500px; overflow: hidden; text-overflow: ellipsis;">${tweet['Tweet_Content']}</td>
-                            <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">${tweet['Predicted_Sentiment']}</td>
-                            <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">${tweet['Accuracy']}</td>
-                        </tr>`;
-                        tableBody.insertAdjacentHTML('afterbegin', row);
-                    });
+            // Sentiment counts
+            let sentimentCounts = {
+                'Positive': 0,
+                'Negative': 0,
+                'Neutral': 0,
+                'Irrelevant': 0
+            };
 
-                    // Update the charts with the new data
-                    updateCharts(data);
-                })
-                .catch(error => {
-                    console.error('Error fetching data:', error);
-                    // Handle error gracefully, e.g., display a message to the user
-                });
-        }
+            data.forEach(tweet => {
+                let row = `<tr>
+                    <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">${tweet['Tweet_ID']}</td>
+                    <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">${tweet['Entity']}</td>
+                    <td style="max-width: 500px; overflow: hidden; text-overflow: ellipsis;">${tweet['Tweet_Content']}</td>
+                    <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">${tweet['Predicted_Sentiment']}</td>
+                    <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">${tweet['Accuracy']}</td>
+                </tr>`;
+                tableBody.insertAdjacentHTML('afterbegin', row);
+
+                // Increment sentiment count
+                sentimentCounts[tweet['Predicted_Sentiment']]++;
+            });
+
+            // Calculate total number of sentiments
+            let totalSentiments = sentimentCounts['Positive'] + sentimentCounts['Negative'] + sentimentCounts['Neutral'] + sentimentCounts['Irrelevant'];
+
+            // Calculate percentages
+            let negativePercentage = ((sentimentCounts['Negative'] / totalSentiments) * 100).toFixed(2);
+            let positivePercentage = ((sentimentCounts['Positive'] / totalSentiments) * 100).toFixed(2);
+            let neutralPercentage = ((sentimentCounts['Neutral'] / totalSentiments) * 100).toFixed(2);
+            let irrelevantPercentage = ((sentimentCounts['Irrelevant'] / totalSentiments) * 100).toFixed(2);
+
+            // Update sentiment count boxes with count and percentage
+            document.getElementById('negativeCount').textContent = `#${sentimentCounts['Negative']} (${negativePercentage}%)`;
+            document.getElementById('positiveCount').textContent = `#${sentimentCounts['Positive']} (${positivePercentage}%)`;
+            document.getElementById('neutralCount').textContent = `#${sentimentCounts['Neutral']} (${neutralPercentage}%)`;
+            document.getElementById('irrelevantCount').textContent = `#${sentimentCounts['Irrelevant']} (${irrelevantPercentage}%)`;
+
+            // Update the charts with the new data
+            updateCharts(data);
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            // Handle error gracefully, e.g., display a message to the user
+        });
+}
 
         // Function to update all charts
         function updateCharts(data) {

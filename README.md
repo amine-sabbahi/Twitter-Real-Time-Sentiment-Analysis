@@ -122,7 +122,9 @@ Pour installer et exécuter ce projet localement, suivez les étapes ci-dessous 
 1. Accédez à l'application Web à l'adresse suivante : http://localhost:5000.
 2. Visualisez les sentiments des tweets en temps réel sur le tableau de bord.
 
-![dashboard](images/dashboard.png)
+![dashboard1](images/dashboard1.png)
+
+![dashboard2](images/dashboard2.png)
 
 ## Contributeurs
 
