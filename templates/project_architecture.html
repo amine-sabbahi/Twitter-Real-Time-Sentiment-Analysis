@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Architecture</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <!-- Include pdfobject.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.1.1/pdfobject.min.js"></script>
+    <style>
+        .pdf-container {
+            margin-top: 20px;
+        }
+        .pdf-viewer {
+            width: 100%;
+            height: calc(100vh - 100px); /* Default height calculation */
+        }
+        .navbar {
+            background-color: #76b4f2;
+        }
+        .navbar-nav {
+            flex-direction: row;
+        }
+        .nav-item {
+            margin-left: 20px;
+        }
+        .nav-link {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #007bff;
+        }
+        .nav-link:hover {
+            color: #0056b3;
+        }
+        .nav-link.active {
+            color: #0056b3;
+        }
+    </style>
+</head>
+<body id="body">
+    <!-- Navigation bar -->
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Dashboard </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="/project_architecture">Project Architecture <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Team</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <!-- PDF Viewer Section -->
+        <div id="pdfContainer" class="pdf-container">
+            <div id="pdfViewer" class="pdf-viewer"></div>
+        </div>
+    </div>
+
+    <script>
+        // Function to adjust the height of the PDF viewer
+        function adjustPDFViewerHeight() {
+            const navbarHeight = document.querySelector('.navbar').offsetHeight;
+            const pdfViewer = document.getElementById('pdfViewer');
+            const bodyHeight = document.getElementById('body').clientHeight;
+            pdfViewer.style.height = `${bodyHeight - navbarHeight - 40}px`; // Adjust for margin and padding
+        }
+
+        // Call the function on window resize
+        window.addEventListener('resize', adjustPDFViewerHeight);
+
+        // Call the function on page load
+        window.addEventListener('load', adjustPDFViewerHeight);
+
+        // Embed the PDF
+        PDFObject.embed("/static/Rapport_technique.pdf", "#pdfViewer");
+    </script>
+</body>
+</html>

@@ -21,5 +21,9 @@ def get_data():
     # Serialize data to JSON
     return json.dumps(data, default=json_util.default)
 
+@app.route('/project_architecture')
+def project_architecture():
+    return render_template('project_architecture.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
