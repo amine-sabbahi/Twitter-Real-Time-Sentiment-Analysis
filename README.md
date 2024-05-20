@@ -128,9 +128,9 @@ Pour installer et exécuter ce projet localement, suivez les étapes ci-dessous 
 
 ## Contributeurs
 
-   - SABBAHI MOHAMED AMINE - [Votre Profil GitHub](https://github.com/amine-sabbahi).
+   - [SABBAHI MOHAMED AMINE](https://github.com/amine-sabbahi).
 
-   - MAHRI AYMANE - [Votre Profil GitHub](https://github.com/AymaneM21).
+   - [MAHRI AYMANE](https://github.com/AymaneM21).
 
 ---
 
@@ -138,4 +138,4 @@ Pour installer et exécuter ce projet localement, suivez les étapes ci-dessous 
    - Département : Génie Informatique
    - Master : AISD
    - Module : Big Data
-   - Pr . EL YUSUFI YASYN
+   - Encadré par : Pr . EL YUSUFI YASYN
