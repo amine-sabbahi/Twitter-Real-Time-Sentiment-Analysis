@@ -134,9 +134,8 @@ Pour installer et exécuter ce projet localement, suivez les étapes ci-dessous 
 
 ---
 
-**Université Abdelmalek Essaadi**
-Faculté des Sciences et Techniques de Tanger
-Département Génie Informatique
-Master : AISD
-Big Data
-Pr . EL YUSUFI YASYN
+**Université Abdelmalek Essaadi** Faculté des Sciences et Techniques de Tanger
+   - Département : Génie Informatique
+   - Master : AISD
+   - Module : Big Data
+   - Pr . EL YUSUFI YASYN
