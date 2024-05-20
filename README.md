@@ -131,4 +131,12 @@ Pour installer et exécuter ce projet localement, suivez les étapes ci-dessous 
    - SABBAHI MOHAMED AMINE - [Votre Profil GitHub](https://github.com/amine-sabbahi).
 
    - MAHRI AYMANE - [Votre Profil GitHub](https://github.com/AymaneM21).
-   
+
+---
+
+**Université Abdelmalek Essaadi**
+Faculté des Sciences et Techniques de Tanger
+Département Génie Informatique
+Master : AISD
+Big Data
+Pr . EL YUSUFI YASYN
