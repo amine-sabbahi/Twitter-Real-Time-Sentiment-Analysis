@@ -102,7 +102,7 @@ Pour installer et exécuter ce projet localement, suivez les étapes ci-dessous 
 1. Clonez le dépôt :
    ```bash
    git clone https://github.com/amine-sabbahi/Twitter-Real-Time-Sentiment-Analysis.git
-   cd twitter-sentiment-analysis
+   cd Twitter-Real-Time-Sentiment-Analysis
    ```
 2. Configurez les environnements Docker :
    ```bash
